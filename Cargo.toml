@@ -1,0 +1,15 @@
+[package]
+name = "maptraces"
+version = "0.1.0"
+authors = ["Lukas Diekmann <lukas.diekmann@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+hwtracer = { git = "https://github.com/softdevteam/hwtracer" }
+phdrs = { git = "https://github.com/softdevteam/phdrs" }
+gimli = "0.19.0"
+object = "0.14.0"
+memmap = "0.7.0"
+
+[build]
+rustflags = ["-g", "-C", "tracer=hw"]
