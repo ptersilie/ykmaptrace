@@ -18,7 +18,7 @@ fn main() {
     let annotrace = mt.annotate_trace(trace).unwrap();
 
     for (taddr, lbl) in annotrace {
-        println!("{}: {}", taddr, lbl);
+        println!("{:x?}: {}", taddr, lbl);
     }
 }
 

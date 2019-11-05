@@ -84,6 +84,7 @@ fn extract_labels() -> Result<HashMap<u64, String>, gimli::Error> {
         &|section| gimli::EndianSlice::new(&*section, endian);
     let dwarf = dwarf_cow.borrow(&borrow_section);
     let mut iter = dwarf.units();
+    let mut subaddr = None;
     while let Some(header) = iter.next()? {
         let unit = dwarf.unit(header)?;
         let mut entries = unit.entries();
@@ -96,8 +97,9 @@ fn extract_labels() -> Result<HashMap<u64, String>, gimli::Error> {
                             gimli::AttributeValue::Addr(v) => v as u64,
                             _ => panic!("This should be an Addr")
                         };
+                        subaddr = Some(addr);
                         //println!("SUBPROG: {}", addr);
-                        labels.insert(addr, s.to_string()?.to_string());
+                        //labels.insert(addr, s.to_string()?.to_string());
                     }
                 }
             }
@@ -111,7 +113,16 @@ fn extract_labels() -> Result<HashMap<u64, String>, gimli::Error> {
                                     gimli::AttributeValue::Addr(v) => v as u64,
                                     _ => panic!("This should be an Addr")
                                 };
-                                labels.insert(addr, s.to_string());
+                                if subaddr.is_some() {
+                                    // Since we can not accurantely insert labels at the beginning
+                                    // of functions, we instead remember the last subprogram
+                                    // address and assign the first block label we find to it.
+                                    labels.insert(subaddr.unwrap(), s.to_string());
+                                    subaddr = None;
+                                }
+                                else {
+                                    labels.insert(addr, s.to_string());
+                                }
                                 //println!("{:x?} {}", addr, s.to_string());
                             }
                             else {
